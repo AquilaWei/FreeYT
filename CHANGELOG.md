@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.1
+## 0.1.0
 
 - Reloads a YouTube watch page when a video ad appears, up to a limit, with a minimum delay between reloads.
 - Returns to the position you were at before a mid-roll ad.
