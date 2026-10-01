@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "FreeYT",
+  "version": "0.0.1",
+  "description": "Reloads a YouTube watch page until the video ad is gone.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/ad-detector.js",
+        "src/ad-guard.js",
+        "src/app.js",
+        "src/main.js",
+        "src/retry-policy.js",
+        "src/settings.js",
+        "src/spa-navigation.js"
+      ],
+      "matches": [
+        "https://www.youtube.com/*"
+      ]
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "FreeYT",
+    "default_popup": "popup.html"
+  }
+}

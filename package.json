@@ -1,0 +1,11 @@
+{
+  "name": "freeyt",
+  "version": "0.0.1",
+  "description": "Chrome extension that reloads YouTube until the video ad is gone",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test \"test/*.test.js\""
+  }
+}
