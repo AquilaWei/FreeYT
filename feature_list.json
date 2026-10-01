@@ -32,7 +32,7 @@
         "Reload delay is configurable and never below a minimum (e.g. 500 ms) to avoid a tight reload loop",
         "Storage is injected (sessionStorage-like object) so tests use an in-memory fake"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F4",

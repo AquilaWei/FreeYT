@@ -3,7 +3,7 @@
 Goal: a Chrome extension that, when a YouTube video ad appears, reloads the page (F5) repeatedly until the ad is gone.
 
 ## Status
-F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested with a hand-written `querySelector` stub, no jsdom). F3–F7 pending; see `feature_list.json` (build order). Next: F3 retry policy.
+F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested with a hand-written `querySelector` stub, no jsdom). F3 done (`src/retry-policy.js` `createRetryPolicy(storage, {maxAttempts, delayMs})` -> `onAdDetected(videoId)`, `onAdFree()`, `attempts(videoId)`; one tracked video in a single storage key; delay floor 500 ms). F4–F7 pending; see `feature_list.json` (build order). Next: F4 content script wiring.
 
 ## Design
 - Manifest V3, a single content script on `https://www.youtube.com/*`, permission `storage` only.
