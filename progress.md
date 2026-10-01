@@ -21,3 +21,4 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - Follow coding-standards: English one-line commits `<type>: <desc>`, feature + its tests in one commit, version only in package.json, no `CLAUDE.md`/`.claude`/`dist` in git.
 - Open questions in `feature_list.json` (tooling, behaviour at cap, ad scope, UI, browsers) await the user's answers; defaults are the first option of each.
 - F2 modules are ES modules, but MV3 content scripts cannot use static `import`. F4 chose dynamic `import()` + `web_accessible_resources`; new modules must be added to that list (a manifest test checks it).
+- Settle window (ad-free → reset retry counter) starts only after a non-ad `<video>` `timeupdate`, never from "no ad visible" alone; otherwise a slow-loading pre-roll resets the counter and the reload cap never triggers.

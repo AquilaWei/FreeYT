@@ -80,23 +80,44 @@ test('ad appearing after start via a mutation schedules a reload', () => {
   assert.equal(state.reloads, 1);
 });
 
-test('no ad within the settle window resets the counter and does not reload', () => {
-  const { guard, state, storage, fire } = setup();
+test('content playing through the settle window resets the counter and does not reload', () => {
+  const { guard, state, storage, fire, timeUpdate } = setup();
   storage.setItem('freeyt.retry', JSON.stringify({ videoId: 'abc', count: 3 }));
   guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 5 });
   fire(3000);
   assert.equal(storage.getItem('freeyt.retry'), null);
   assert.equal(state.reloads, 0);
 });
 
 test('an ad showing up inside the settle window cancels the reset', () => {
-  const { guard, state, storage } = setup();
+  const { guard, state, storage, timeUpdate } = setup();
   storage.setItem('freeyt.retry', JSON.stringify({ videoId: 'abc', count: 3 }));
   guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 5 });
   state.ad = true;
   state.observers[0].callback();
   assert.equal(state.timers.some((t) => t.ms === 3000), false);
   assert.notEqual(storage.getItem('freeyt.retry'), null);
+});
+
+test('no content playback keeps the counter, so a late ad counts as the next attempt', () => {
+  const { guard, state, storage, fire } = setup({ maxAttempts: 3 });
+  storage.setItem('freeyt.retry', JSON.stringify({ videoId: 'abc', count: 1 }));
+  guard.start();
+  state.observers[0].callback();
+  assert.equal(state.timers.some((t) => t.ms === 3000), false);
+  state.ad = true;
+  state.observers[0].callback();
+  fire(1000);
+  assert.equal(JSON.parse(storage.getItem('freeyt.retry')).count, 2);
+});
+
+test('timeupdate from an ad does not start the settle window', () => {
+  const { guard, state, timeUpdate } = setup({ ad: true });
+  guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 1 });
+  assert.equal(state.timers.some((t) => t.ms === 3000), false);
 });
 
 test('ad still present after the cap does not reload and logs why', () => {

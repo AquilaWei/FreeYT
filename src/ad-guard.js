@@ -2,7 +2,7 @@ import { isAdPlaying } from './ad-detector.js';
 
 const RESUME_KEY = 'freeyt.resume';
 
-// Time without an ad before the page counts as ad-free and the retry counter is reset.
+// Time of uninterrupted content playback before the page counts as ad-free and the retry counter is reset.
 export const DEFAULT_SETTLE_MS = 3000;
 
 /**
@@ -34,6 +34,7 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
   let reloadTimer = null;
   let settleTimer = null;
   let limitLogged = false;
+  let adFree = false;
   let videoId = null;
   let lastContentTime = null;
   let resumeTime = null;
@@ -61,9 +62,22 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
       video.currentTime = resumeTime;
       resumeTime = null;
       storage.removeItem(RESUME_KEY);
-      return;
+    } else {
+      lastContentTime = video.currentTime;
     }
-    lastContentTime = video.currentTime;
+    startSettleWindow();
+  }
+
+  // Only playing content proves the page is ad-free: right after a reload the player may not
+  // exist yet, and "no ad visible" then must not reset the counter or the reload cap never triggers.
+  function startSettleWindow() {
+    if (adFree || settleTimer !== null) return;
+    settleTimer = setTimeout(() => {
+      settleTimer = null;
+      if (isAdPlaying(doc)) return;
+      adFree = true;
+      policy.onAdFree();
+    }, settleMs);
   }
 
   function cancel(timer) {
@@ -74,6 +88,7 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
   function check() {
     if (isAdPlaying(doc)) {
       settleTimer = cancel(settleTimer);
+      adFree = false;
       if (reloadTimer !== null) return; // a reload is already scheduled
       const decision = policy.onAdDetected(videoId);
       if (decision.reload) {
@@ -86,13 +101,6 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
         limitLogged = true;
         log(`FreeYT: ad still present after ${policy.attempts(videoId)} reloads, giving up on this video.`);
       }
-      return;
-    }
-    if (settleTimer === null) {
-      settleTimer = setTimeout(() => {
-        settleTimer = null;
-        if (!isAdPlaying(doc)) policy.onAdFree();
-      }, settleMs);
     }
   }
 
@@ -121,6 +129,7 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
       reloadTimer = cancel(reloadTimer);
       settleTimer = cancel(settleTimer);
       limitLogged = false;
+      adFree = false;
     },
   };
 }
