@@ -44,7 +44,7 @@
         "Only active on watch pages (/watch), not on home, search or Shorts",
         "Detection uses MutationObserver on the player, not a polling busy loop"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F5",

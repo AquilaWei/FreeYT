@@ -26,3 +26,8 @@ test('content script file listed in manifest exists', () => {
   const file = manifest.content_scripts[0].js[0];
   assert.doesNotThrow(() => readFileSync(new URL(`../${file}`, import.meta.url)));
 });
+
+test('modules loaded by the content script are web accessible', () => {
+  const resources = manifest.web_accessible_resources[0].resources;
+  assert.deepEqual(resources.sort(), ['src/ad-detector.js', 'src/ad-guard.js', 'src/main.js', 'src/retry-policy.js']);
+});

@@ -3,7 +3,7 @@
 Goal: a Chrome extension that, when a YouTube video ad appears, reloads the page (F5) repeatedly until the ad is gone.
 
 ## Status
-F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested with a hand-written `querySelector` stub, no jsdom). F3 done (`src/retry-policy.js` `createRetryPolicy(storage, {maxAttempts, delayMs})` -> `onAdDetected(videoId)`, `onAdFree()`, `attempts(videoId)`; one tracked video in a single storage key; delay floor 500 ms; non-numeric options and corrupt stored counts fall back to defaults). F4–F7 pending; see `feature_list.json` (build order). Next: F4 content script wiring.
+F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested with a hand-written `querySelector` stub, no jsdom). F3 done (`src/retry-policy.js` `createRetryPolicy(storage, {maxAttempts, delayMs})` -> `onAdDetected(videoId)`, `onAdFree()`, `attempts(videoId)`; one tracked video in a single storage key; delay floor 500 ms; non-numeric options and corrupt stored counts fall back to defaults). F4 done (`src/ad-guard.js` `createAdGuard({...}).start()/stop()`, all env injected; `src/content.js` is a classic-script loader that `import()`s `src/main.js`, modules listed in `web_accessible_resources`; settle window 3000 ms resets the counter). F5–F7 pending; see `feature_list.json` (build order). Next: F5 SPA navigation (`yt-navigate-finish` -> `stop()` then `start()`; guard already tolerates repeated start/stop). Not yet verified in a real browser.
 
 ## Design
 - Manifest V3, a single content script on `https://www.youtube.com/*`, permission `storage` only.
@@ -20,4 +20,4 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - Need manual acceptance (not automatable): load unpacked, open a video with ads, confirm reloads stop when the ad is gone, confirm cap behaviour, confirm no reload on home/Shorts.
 - Follow coding-standards: English one-line commits `<type>: <desc>`, feature + its tests in one commit, version only in package.json, no `CLAUDE.md`/`.claude`/`dist` in git.
 - Open questions in `feature_list.json` (tooling, behaviour at cap, ad scope, UI, browsers) await the user's answers; defaults are the first option of each.
-- F2 modules are ES modules, but MV3 content scripts cannot use static `import`. F4 must load them via dynamic `import(chrome.runtime.getURL(...))` (needs `web_accessible_resources`) or a bundling step; decide then.
+- F2 modules are ES modules, but MV3 content scripts cannot use static `import`. F4 chose dynamic `import()` + `web_accessible_resources`; new modules must be added to that list (a manifest test checks it).

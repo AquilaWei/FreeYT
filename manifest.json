@@ -5,9 +5,26 @@
   "description": "Reloads a YouTube watch page until the video ad is gone.",
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "js": ["src/content.js"],
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "src/content.js"
+      ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/main.js",
+        "src/ad-guard.js",
+        "src/ad-detector.js",
+        "src/retry-policy.js"
+      ],
+      "matches": [
+        "https://www.youtube.com/*"
+      ]
     }
   ]
 }
