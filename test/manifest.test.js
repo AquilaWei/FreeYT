@@ -29,5 +29,5 @@ test('content script file listed in manifest exists', () => {
 
 test('modules loaded by the content script are web accessible', () => {
   const resources = manifest.web_accessible_resources[0].resources;
-  assert.deepEqual(resources.sort(), ['src/ad-detector.js', 'src/ad-guard.js', 'src/main.js', 'src/retry-policy.js']);
+  assert.deepEqual(resources.sort(), ['src/ad-detector.js', 'src/ad-guard.js', 'src/main.js', 'src/retry-policy.js', 'src/spa-navigation.js']);
 });

@@ -54,7 +54,7 @@
         "Counter for the previous video does not leak into the new one",
         "Listener is removed/not duplicated on repeated init (tested with a fake event target)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F6",
