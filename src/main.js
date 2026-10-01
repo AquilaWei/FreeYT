@@ -15,4 +15,4 @@ const guard = createAdGuard({
 });
 
 // YouTube is an SPA: re-arm the guard on every in-page navigation.
-createSpaNavigation({ target: document, guard }).init();
+createSpaNavigation({ target: document, guard, location }).init();

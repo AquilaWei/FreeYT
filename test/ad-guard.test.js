@@ -182,6 +182,19 @@ test('mid-roll ad saves the last content position before the reload', () => {
   assert.deepEqual(JSON.parse(storage.getItem('freeyt.resume')), { videoId: 'abc', time: 125.5 });
 });
 
+test('mid-roll ad after the settle window starts again from attempt 1 and saves the position', () => {
+  const { guard, state, storage, fire, timeUpdate } = setup();
+  storage.setItem('freeyt.retry', JSON.stringify({ videoId: 'abc', count: 4 }));
+  guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 200 });
+  fire(3000);
+  state.ad = true;
+  state.observers[0].callback();
+  assert.equal(state.timers.some((t) => t.ms === 1000), true);
+  assert.equal(JSON.parse(storage.getItem('freeyt.retry')).count, 1);
+  assert.deepEqual(JSON.parse(storage.getItem('freeyt.resume')), { videoId: 'abc', time: 200 });
+});
+
 test('timeupdate from the ad itself is not recorded as content position', () => {
   const { guard, state, storage, timeUpdate } = setup();
   guard.start();

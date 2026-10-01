@@ -22,3 +22,6 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - Open questions in `feature_list.json` (tooling, behaviour at cap, ad scope, UI, browsers) await the user's answers; defaults are the first option of each.
 - F2 modules are ES modules, but MV3 content scripts cannot use static `import`. F4 chose dynamic `import()` + `web_accessible_resources`; new modules must be added to that list (a manifest test checks it).
 - Settle window (ad-free → reset retry counter) starts only after a non-ad `<video>` `timeupdate`, never from "no ad visible" alone; otherwise a slow-loading pre-roll resets the counter and the reload cap never triggers.
+- `yt-navigate-finish` for the same `pathname` + `v` is ignored by `createSpaNavigation` (it needs `location`); otherwise the restart cancels a pending reload and counts one ad as two attempts.
+- Manual real-browser check, resume seek: the seek runs on the first ad-free `timeupdate`. If YouTube adds `ad-showing` only after the pre-roll's first `timeupdate`, the guard would set `currentTime` on the ad's video and drop the saved position.
+- Manual real-browser check, observer scope: without `#movie_player` the guard observes class changes on the whole `body`, which can be expensive; it switches to the player only after the next navigation restarts it.
