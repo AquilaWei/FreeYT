@@ -41,4 +41,4 @@ Automated tests use fakes, so these need a real Chrome:
 
 ## License
 
-[BSD 4-Clause](LICENSE)
+[BSD 3-Clause](LICENSE)
