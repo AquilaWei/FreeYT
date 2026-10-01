@@ -20,7 +20,7 @@
         "Returns false for a fixture of a normal video, and for a page with no player",
         "Tests run against jsdom-free HTML fixtures or a minimal DOM stub (decide in-session, keep dependencies minimal)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F3",

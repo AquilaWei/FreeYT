@@ -3,7 +3,7 @@
 Goal: a Chrome extension that, when a YouTube video ad appears, reloads the page (F5) repeatedly until the ad is gone.
 
 ## Status
-F1 done (scaffold: manifest.json, package.json v0.0.1, placeholder `src/content.js`, README, manifest tests). F2–F7 pending; see `feature_list.json` (build order). Next: F2 ad detector.
+F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested with a hand-written `querySelector` stub, no jsdom). F3–F7 pending; see `feature_list.json` (build order). Next: F3 retry policy.
 
 ## Design
 - Manifest V3, a single content script on `https://www.youtube.com/*`, permission `storage` only.
@@ -20,3 +20,4 @@ F1 done (scaffold: manifest.json, package.json v0.0.1, placeholder `src/content.
 - Need manual acceptance (not automatable): load unpacked, open a video with ads, confirm reloads stop when the ad is gone, confirm cap behaviour, confirm no reload on home/Shorts.
 - Follow coding-standards: English one-line commits `<type>: <desc>`, feature + its tests in one commit, version only in package.json, no `CLAUDE.md`/`.claude`/`dist` in git.
 - Open questions in `feature_list.json` (tooling, behaviour at cap, ad scope, UI, browsers) await the user's answers; defaults are the first option of each.
+- F2 modules are ES modules, but MV3 content scripts cannot use static `import`. F4 must load them via dynamic `import(chrome.runtime.getURL(...))` (needs `web_accessible_resources`) or a bundling step; decide then.
