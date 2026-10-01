@@ -44,3 +44,8 @@ test('manifest has no host permissions beyond youtube.com', () => {
 test('popup page declared in the manifest exists', () => {
   assert.doesNotThrow(() => readFileSync(new URL(`../${manifest.action.default_popup}`, import.meta.url)));
 });
+
+test('CHANGELOG top entry matches the package version', () => {
+  const log = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+  assert.equal(log.match(/^## (\S+)/m)[1], pkg.version);
+});

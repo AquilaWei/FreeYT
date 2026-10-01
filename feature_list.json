@@ -75,7 +75,7 @@
         "CHANGELOG.md exists and its top entry matches the package version",
         "README lists the manual real-browser acceptance checklist (load unpacked, open a video with ads, observe reloads stop, confirm cap behaviour)"
       ],
-      "passes": false
+      "passes": true
     }
   ],
   "verify": "npm test",
