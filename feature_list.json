@@ -65,7 +65,7 @@
         "Popup shows the toggle state and the reload count for the current tab (storage faked in tests)",
         "manifest declares only the permissions it needs (storage); a test asserts no extra permissions or host permissions beyond youtube.com"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F7",

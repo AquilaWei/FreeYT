@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FreeYT</title>
+  <style>
+    body { font: 14px sans-serif; width: 260px; margin: 12px; }
+    label { display: block; margin: 8px 0; }
+    input[type="number"] { width: 80px; float: right; }
+    #status { color: #555; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <label><input type="checkbox" id="enabled"> Enabled</label>
+  <label>Max reloads <input type="number" id="maxAttempts" min="1" max="50"></label>
+  <label>Delay (ms) <input type="number" id="delayMs" min="500" max="30000" step="100"></label>
+  <p>Reloads on this video: <strong id="attempts">–</strong></p>
+  <p id="status"></p>
+  <script type="module" src="src/popup-main.js"></script>
+</body>
+</html>
