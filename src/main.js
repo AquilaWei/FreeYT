@@ -6,6 +6,7 @@ createAdGuard({
   doc: document,
   location,
   policy: createRetryPolicy(sessionStorage),
+  storage: sessionStorage,
   MutationObserver,
   setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
   clearTimeout: (handle) => globalThis.clearTimeout(handle),

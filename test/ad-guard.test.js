@@ -11,7 +11,13 @@ function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts
     removeItem: (key) => data.delete(key),
   };
   const state = { ad, reloads: 0, logs: [], timers: [], observers: [], nextId: 1 };
+  const listeners = [];
   const doc = {
+    addEventListener: (type, fn) => listeners.push({ type, fn }),
+    removeEventListener: (type, fn) => {
+      const i = listeners.findIndex((l) => l.type === type && l.fn === fn);
+      if (i >= 0) listeners.splice(i, 1);
+    },
     body: { name: 'body' },
     querySelector: (selector) => {
       if (selector === '#movie_player.ad-showing') return state.ad ? {} : null;
@@ -33,6 +39,7 @@ function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts
     doc,
     location: { pathname, search, reload: () => { state.reloads++; } },
     policy: createRetryPolicy(storage, { maxAttempts, delayMs: 1000 }),
+    storage,
     MutationObserver: FakeObserver,
     setTimeout: (fn, ms) => { const id = state.nextId++; state.timers.push({ id, fn, ms }); return id; },
     clearTimeout: (id) => { state.timers = state.timers.filter((t) => t.id !== id); },
@@ -44,7 +51,8 @@ function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts
     state.timers = state.timers.filter((t) => t !== timer);
     timer.fn();
   };
-  return { guard, state, storage, fire };
+  const timeUpdate = (video) => listeners.filter((l) => l.type === 'timeupdate').forEach((l) => l.fn({ target: video }));
+  return { guard, state, storage, fire, timeUpdate, listeners };
 }
 
 test('ad detected on start reloads once after the policy delay', () => {
@@ -142,4 +150,76 @@ test('stop disconnects the observer and cancels pending timers', () => {
   guard.stop();
   assert.equal(state.observers[0].disconnected, true);
   assert.equal(state.timers.length, 0);
+});
+
+test('mid-roll ad saves the last content position before the reload', () => {
+  const { guard, state, storage, timeUpdate } = setup();
+  guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 125.5 });
+  state.ad = true;
+  state.observers[0].callback();
+  assert.deepEqual(JSON.parse(storage.getItem('freeyt.resume')), { videoId: 'abc', time: 125.5 });
+});
+
+test('timeupdate from the ad itself is not recorded as content position', () => {
+  const { guard, state, storage, timeUpdate } = setup();
+  guard.start();
+  timeUpdate({ tagName: 'VIDEO', currentTime: 125.5 });
+  state.ad = true;
+  timeUpdate({ tagName: 'VIDEO', currentTime: 3 });
+  state.observers[0].callback();
+  assert.equal(JSON.parse(storage.getItem('freeyt.resume')).time, 125.5);
+});
+
+test('reloaded page seeks to the saved position on the first ad-free timeupdate', () => {
+  const { guard, storage, timeUpdate } = setup();
+  storage.setItem('freeyt.resume', JSON.stringify({ videoId: 'abc', time: 125.5 }));
+  guard.start();
+  const video = { tagName: 'VIDEO', currentTime: 0 };
+  timeUpdate(video);
+  assert.equal(video.currentTime, 125.5);
+  assert.equal(storage.getItem('freeyt.resume'), null);
+});
+
+test('does not seek while the reloaded page still shows an ad', () => {
+  const { guard, storage, timeUpdate } = setup({ ad: true });
+  storage.setItem('freeyt.resume', JSON.stringify({ videoId: 'abc', time: 125.5 }));
+  guard.start();
+  const video = { tagName: 'VIDEO', currentTime: 2 };
+  timeUpdate(video);
+  assert.equal(video.currentTime, 2);
+  assert.notEqual(storage.getItem('freeyt.resume'), null);
+});
+
+test('a position saved for another video is not applied', () => {
+  const { guard, storage, timeUpdate } = setup();
+  storage.setItem('freeyt.resume', JSON.stringify({ videoId: 'other', time: 99 }));
+  guard.start();
+  const video = { tagName: 'VIDEO', currentTime: 0 };
+  timeUpdate(video);
+  assert.equal(video.currentTime, 0);
+});
+
+test('a second reload keeps the position saved before the first one', () => {
+  const { guard, state, storage } = setup({ ad: true });
+  storage.setItem('freeyt.resume', JSON.stringify({ videoId: 'abc', time: 125.5 }));
+  guard.start();
+  assert.equal(JSON.parse(storage.getItem('freeyt.resume')).time, 125.5);
+  assert.equal(state.timers.some((t) => t.ms === 1000), true);
+});
+
+test('corrupt saved position is ignored', () => {
+  const { guard, storage, timeUpdate } = setup();
+  storage.setItem('freeyt.resume', 'not json');
+  guard.start();
+  const video = { tagName: 'VIDEO', currentTime: 0 };
+  timeUpdate(video);
+  assert.equal(video.currentTime, 0);
+});
+
+test('stop removes the timeupdate listener', () => {
+  const { guard, listeners } = setup();
+  guard.start();
+  guard.stop();
+  assert.equal(listeners.length, 0);
 });
