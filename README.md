@@ -38,3 +38,7 @@ Automated tests use fakes, so these need a real Chrome:
 - [ ] Moving to another video from the sidebar re-arms the guard with a fresh count
 - [ ] Popup shows the reload count on a watch page and `–` elsewhere
 - [ ] Turning the toggle off and refreshing stops all reloads
+
+## License
+
+[BSD 4-Clause](LICENSE)
