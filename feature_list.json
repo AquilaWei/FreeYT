@@ -1,0 +1,104 @@
+{
+  "features": [
+    {
+      "id": "F1",
+      "description": "Project scaffold: MV3 manifest, package.json with zero-dependency test runner (node:test), README skeleton, .gitignore",
+      "steps": [
+        "manifest.json is valid MV3 with name, version, content_scripts matching https://www.youtube.com/* and a test asserts these fields",
+        "package.json has the only version declaration; manifest version is checked by a test to equal it",
+        "`npm test` runs and passes with no network or browser",
+        "README states what it does, how to load the unpacked extension, how to run tests"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F2",
+      "description": "Pure ad detector module: given a DOM (document), decide whether a YouTube video ad is currently playing",
+      "steps": [
+        "Returns true for a DOM fixture where #movie_player has class ad-showing",
+        "Returns true for a fixture containing .ytp-ad-player-overlay or .video-ads .ad-interstitial",
+        "Returns false for a fixture of a normal video, and for a page with no player",
+        "Tests run against jsdom-free HTML fixtures or a minimal DOM stub (decide in-session, keep dependencies minimal)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F3",
+      "description": "Retry policy module: decides whether to reload, tracking attempts per video id with a cap and delay",
+      "steps": [
+        "First ad detection on a video returns {reload: true} and increments the stored counter",
+        "After max attempts (default 10) returns {reload: false, reason: 'limit'}",
+        "Counter resets when the video id changes or an ad-free state is confirmed",
+        "Reload delay is configurable and never below a minimum (e.g. 500 ms) to avoid a tight reload loop",
+        "Storage is injected (sessionStorage-like object) so tests use an in-memory fake"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F4",
+      "description": "Content script wiring: observe the player, on ad detection call location.reload() per the retry policy until no ad is present",
+      "steps": [
+        "With injected fakes, ad detected -> reload called once after the delay",
+        "No ad within a settle window -> counter reset and no reload",
+        "Ad still present after cap -> no further reload and a console message explains why",
+        "Only active on watch pages (/watch), not on home, search or Shorts",
+        "Detection uses MutationObserver on the player, not a polling busy loop"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F5",
+      "description": "SPA navigation handling: re-arm the logic when YouTube navigates between videos without a full page load",
+      "steps": [
+        "A yt-navigate-finish event re-initialises detection for the new video id",
+        "Counter for the previous video does not leak into the new one",
+        "Listener is removed/not duplicated on repeated init (tested with a fake event target)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F6",
+      "description": "Popup and options: enable/disable toggle, max attempts and delay, stored in chrome.storage.sync",
+      "steps": [
+        "Settings module returns defaults when storage is empty and validates out-of-range values (clamps or rejects)",
+        "Content script reads the settings and honors enabled=false (no reload ever)",
+        "Popup shows the toggle state and the reload count for the current tab (storage faked in tests)",
+        "manifest declares only the permissions it needs (storage); a test asserts no extra permissions or host permissions beyond youtube.com"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F7",
+      "description": "Packaging and docs: zip build script, CHANGELOG, README finalised, manual acceptance checklist",
+      "steps": [
+        "`npm run build` produces dist/freeyt-<version>.zip containing manifest and scripts only (no tests, no node_modules); a test inspects the zip listing",
+        "CHANGELOG.md exists and its top entry matches the package version",
+        "README lists the manual real-browser acceptance checklist (load unpacked, open a video with ads, observe reloads stop, confirm cap behaviour)"
+      ],
+      "passes": false
+    }
+  ],
+  "verify": "npm test",
+  "questions": [
+    {
+      "question": "Language/tooling for the extension?",
+      "options": ["Plain JavaScript (ES modules) + node:test, zero dependencies", "TypeScript + vitest + esbuild", "TypeScript + Vite (crxjs)"]
+    },
+    {
+      "question": "What should happen when the ad persists after the max reload attempts?",
+      "options": ["Stop reloading and leave the page (show a console/badge note)", "Keep reloading with growing delay (backoff), never stop", "Stop and try to click the Skip button instead"]
+    },
+    {
+      "question": "Which ads should trigger a reload?",
+      "options": ["Any video ad (pre-roll and mid-roll)", "Pre-roll only (before the video starts)", "Only ads that cannot be skipped"]
+    },
+    {
+      "question": "Should there be a popup/options UI (F6)?",
+      "options": ["Yes: toggle plus attempt/delay settings", "Toggle only", "No UI, hardcoded defaults"]
+    },
+    {
+      "question": "Target browsers?",
+      "options": ["Chrome only (MV3)", "Chrome plus other Chromium (Edge, Brave)", "Chrome plus Firefox"]
+    }
+  ]
+}
