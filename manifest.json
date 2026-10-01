@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "FreeYT",
+  "version": "0.0.1",
+  "description": "Reloads a YouTube watch page until the video ad is gone.",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 Goal: a Chrome extension that, when a YouTube video ad appears, reloads the page (F5) repeatedly until the ad is gone.
 
 ## Status
-Planning only. The repo was empty; nothing is implemented. See `feature_list.json` (F1–F7, in build order).
+F1 done (scaffold: manifest.json, package.json v0.0.1, placeholder `src/content.js`, README, manifest tests). F2–F7 pending; see `feature_list.json` (build order). Next: F2 ad detector.
 
 ## Design
 - Manifest V3, a single content script on `https://www.youtube.com/*`, permission `storage` only.
@@ -13,7 +13,7 @@ Planning only. The repo was empty; nothing is implemented. See `feature_list.jso
 - YouTube is an SPA: handle `yt-navigate-finish`.
 
 ## Verify command
-`npm test` (proposed; uses `node --test`, no browser, no network). F1 must create `package.json` so it works.
+`npm test` (`node --test "test/*.test.js"`; the glob is needed on Node 24; no browser, no network).
 
 ## Notes for the next session
 - Ads are frequently chosen server-side per request, so reloading may show another ad; that is why the cap/backoff matters. Real effectiveness can only be checked in a real browser.

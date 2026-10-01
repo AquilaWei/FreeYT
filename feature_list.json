@@ -9,7 +9,7 @@
         "`npm test` runs and passes with no network or browser",
         "README states what it does, how to load the unpacked extension, how to run tests"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F2",
