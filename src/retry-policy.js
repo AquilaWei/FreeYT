@@ -5,6 +5,11 @@ export const MIN_DELAY_MS = 500;
 
 const STORAGE_KEY = 'freeyt.retry';
 
+function finiteOr(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 /**
  * Decides whether to reload the page when an ad is detected.
  *
@@ -16,13 +21,23 @@ const STORAGE_KEY = 'freeyt.retry';
  * @param {{maxAttempts?: number, delayMs?: number}} [options] `delayMs` is raised to MIN_DELAY_MS if lower.
  */
 export function createRetryPolicy(storage, { maxAttempts = DEFAULT_MAX_ATTEMPTS, delayMs = DEFAULT_DELAY_MS } = {}) {
-  const effectiveDelayMs = Math.max(delayMs, MIN_DELAY_MS);
+  // Settings may come from user-editable storage; non-numeric values must not disable the floor or the cap.
+  const effectiveDelayMs = Math.max(finiteOr(delayMs, DEFAULT_DELAY_MS), MIN_DELAY_MS);
+  const effectiveMaxAttempts = finiteOr(maxAttempts, DEFAULT_MAX_ATTEMPTS);
 
   function readCount(videoId) {
     const raw = storage.getItem(STORAGE_KEY);
     if (raw === null) return 0;
-    const saved = JSON.parse(raw);
-    return saved.videoId === videoId ? saved.count : 0;
+    // The key lives in the page's sessionStorage, which youtube.com's own scripts can write too:
+    // anything unparseable or of the wrong shape counts as "no attempts"; onAdDetected overwrites it.
+    let saved;
+    try {
+      saved = JSON.parse(raw);
+    } catch {
+      return 0;
+    }
+    if (saved === null || typeof saved !== 'object' || saved.videoId !== videoId) return 0;
+    return Number.isFinite(saved.count) ? saved.count : 0;
   }
 
   return {
@@ -33,7 +48,7 @@ export function createRetryPolicy(storage, { maxAttempts = DEFAULT_MAX_ATTEMPTS,
      */
     onAdDetected(videoId) {
       const count = readCount(videoId);
-      if (count >= maxAttempts) return { reload: false, reason: 'limit' };
+      if (count >= effectiveMaxAttempts) return { reload: false, reason: 'limit' };
       storage.setItem(STORAGE_KEY, JSON.stringify({ videoId, count: count + 1 }));
       return { reload: true, delayMs: effectiveDelayMs };
     },

@@ -60,3 +60,49 @@ test('delay below the minimum is raised to 500 ms', () => {
   const policy = createRetryPolicy(fakeStorage(), { delayMs: 0 });
   assert.equal(policy.onAdDetected('abc').delayMs, 500);
 });
+
+test('non-numeric delay falls back to the default instead of skipping the floor', () => {
+  const policy = createRetryPolicy(fakeStorage(), { delayMs: NaN });
+  assert.equal(policy.onAdDetected('abc').delayMs, 1000);
+});
+
+test('non-numeric string delay is never below 500 ms', () => {
+  const policy = createRetryPolicy(fakeStorage(), { delayMs: 'abc' });
+  assert.equal(policy.onAdDetected('abc').delayMs, 1000);
+});
+
+test('NaN max attempts falls back to the default cap of 10', () => {
+  const policy = createRetryPolicy(fakeStorage(), { maxAttempts: NaN });
+  for (let i = 0; i < 10; i++) policy.onAdDetected('abc');
+  assert.deepEqual(policy.onAdDetected('abc'), { reload: false, reason: 'limit' });
+});
+
+test('non-numeric string max attempts still caps reloads', () => {
+  const policy = createRetryPolicy(fakeStorage(), { maxAttempts: 'abc' });
+  for (let i = 0; i < 10; i++) policy.onAdDetected('abc');
+  assert.equal(policy.onAdDetected('abc').reload, false);
+});
+
+test('unparseable stored data counts as zero attempts and is overwritten', () => {
+  const storage = fakeStorage();
+  storage.setItem('freeyt.retry', 'not json');
+  const policy = createRetryPolicy(storage);
+  assert.equal(policy.attempts('abc'), 0);
+  assert.deepEqual(policy.onAdDetected('abc'), { reload: true, delayMs: 1000 });
+  assert.equal(policy.attempts('abc'), 1);
+});
+
+test('stored data with a non-numeric count counts as zero attempts', () => {
+  const storage = fakeStorage();
+  storage.setItem('freeyt.retry', '{"videoId":"abc","count":"x"}');
+  const policy = createRetryPolicy(storage);
+  assert.equal(policy.attempts('abc'), 0);
+  assert.equal(policy.onAdDetected('abc').reload, true);
+  assert.equal(policy.attempts('abc'), 1);
+});
+
+test('stored JSON null counts as zero attempts', () => {
+  const storage = fakeStorage();
+  storage.setItem('freeyt.retry', 'null');
+  assert.equal(createRetryPolicy(storage).attempts('abc'), 0);
+});

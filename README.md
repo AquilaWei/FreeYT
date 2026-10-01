@@ -2,7 +2,7 @@
 
 A Chrome extension (Manifest V3) that **reloads a YouTube watch page (F5)** when a video ad shows up, and keeps doing so until the ad is gone.
 
-> Status: scaffold only. Ad detection and reload logic are not implemented yet.
+> Status: in progress. The ad detector and the retry policy (reload cap, minimum delay, per-video counter) are done and tested. The content script that wires them to the YouTube page is not implemented yet, so the extension does not reload anything yet.
 
 ## Load the unpacked extension
 
