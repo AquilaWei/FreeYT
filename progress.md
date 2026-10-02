@@ -13,7 +13,7 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - YouTube is an SPA: handle `yt-navigate-finish`.
 
 ## Verify command
-`npm test` (`node --test "test/*.test.js"`; the glob is needed on Node 24; no browser, no network).
+`npm test` (`node --test "test/*.test.js"`; the quoted glob needs Node 21+, CI uses 22; no browser, no network).
 
 ## Notes for the next session
 - Ads are frequently chosen server-side per request, so reloading may show another ad; that is why the cap/backoff matters. Real effectiveness can only be checked in a real browser.

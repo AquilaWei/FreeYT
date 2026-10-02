@@ -15,7 +15,7 @@ const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   return c >>> 0;
 });
 
-// zlib.crc32 only exists on Node 22+; README promises Node 20+.
+// Own CRC-32: zlib.crc32 is missing on older Node 20/22 releases.
 function crc32(buf) {
   let c = 0xffffffff;
   for (const byte of buf) c = CRC_TABLE[(c ^ byte) & 0xff] ^ (c >>> 8);

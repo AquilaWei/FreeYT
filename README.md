@@ -24,7 +24,7 @@ Writes `dist/freeyt-<version>.zip` with the manifest, popup and `src/` only.
 npm test
 ```
 
-Needs Node 20+; no dependencies, no browser, no network.
+Needs Node 22+; no dependencies, no browser, no network.
 
 ## Icons
 
