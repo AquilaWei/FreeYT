@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { createAdGuard } from '../src/ad-guard.js';
 import { createRetryPolicy } from '../src/retry-policy.js';
 
-function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts } = {}) {
+function setup({ pathname = '/watch', search = '?v=abc', ad = false, player = true, maxAttempts } = {}) {
   const data = new Map();
   const storage = {
     getItem: (key) => (data.has(key) ? data.get(key) : null),
     setItem: (key, value) => data.set(key, String(value)),
     removeItem: (key) => data.delete(key),
   };
-  const state = { ad, reloads: 0, logs: [], timers: [], observers: [], nextId: 1 };
+  const state = { ad, player, reloads: 0, logs: [], timers: [], observers: [], nextId: 1 };
   const listeners = [];
   const doc = {
     addEventListener: (type, fn) => listeners.push({ type, fn }),
@@ -21,7 +21,7 @@ function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts
     body: { name: 'body' },
     querySelector: (selector) => {
       if (selector === '#movie_player.ad-showing') return state.ad ? {} : null;
-      if (selector === '#movie_player') return { name: 'player' };
+      if (selector === '#movie_player') return state.player ? { name: 'player' } : null;
       return null;
     },
   };
@@ -32,7 +32,7 @@ function setup({ pathname = '/watch', search = '?v=abc', ad = false, maxAttempts
       this.disconnected = false;
       state.observers.push(this);
     }
-    observe(target) { this.target = target; }
+    observe(target) { this.target = target; this.disconnected = false; }
     disconnect() { this.disconnected = true; }
   }
   const guard = createAdGuard({
@@ -156,6 +156,20 @@ test('observes the player element with a MutationObserver', () => {
   const { guard, state } = setup();
   guard.start();
   assert.equal(state.observers[0].target.name, 'player');
+});
+
+test('without a player the body is observed', () => {
+  const { guard, state } = setup({ player: false });
+  guard.start();
+  assert.deepEqual(state.observers[0].target, { name: 'body' });
+});
+
+test('observation moves from the body to the player once the player appears', () => {
+  const { guard, state } = setup({ player: false });
+  guard.start();
+  state.player = true;
+  state.observers[0].callback();
+  assert.deepEqual(state.observers[0].target, { name: 'player' });
 });
 
 test('start twice creates a single observer', () => {

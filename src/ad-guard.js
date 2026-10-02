@@ -5,6 +5,8 @@ const RESUME_KEY = 'freeyt.resume';
 // Time of uninterrupted content playback before the page counts as ad-free and the retry counter is reset.
 export const DEFAULT_SETTLE_MS = 3000;
 
+const OBSERVE_OPTIONS = { attributes: true, attributeFilter: ['class'], childList: true, subtree: true };
+
 /**
  * Watches a YouTube watch page and reloads it while a video ad is playing.
  *
@@ -31,6 +33,7 @@ export const DEFAULT_SETTLE_MS = 3000;
  */
 export function createAdGuard({ doc, location, policy, storage, MutationObserver, setTimeout, clearTimeout, log, settleMs = DEFAULT_SETTLE_MS }) {
   let observer = null;
+  let observingBody = false;
   let reloadTimer = null;
   let settleTimer = null;
   let limitLogged = false;
@@ -85,7 +88,18 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
     return null;
   }
 
+  // Watching the whole body is costly on YouTube (comments, recommendations keep mutating),
+  // so move to the player as soon as it shows up.
+  function narrowToPlayer() {
+    const player = doc.querySelector('#movie_player');
+    if (player === null) return;
+    observer.disconnect();
+    observer.observe(player, OBSERVE_OPTIONS);
+    observingBody = false;
+  }
+
   function check() {
+    if (observingBody) narrowToPlayer();
     if (isAdPlaying(doc)) {
       settleTimer = cancel(settleTimer);
       adFree = false;
@@ -109,12 +123,13 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
       if (observer !== null || location.pathname !== '/watch') return;
       videoId = new URLSearchParams(location.search).get('v');
       if (!videoId) return;
-      // The player may not exist yet; fall back to the body until it does.
-      const root = doc.querySelector('#movie_player') ?? doc.body;
+      // The player may not exist yet; fall back to the body until it does (see narrowToPlayer).
+      const player = doc.querySelector('#movie_player');
+      observingBody = player === null;
       resumeTime = readResume();
       doc.addEventListener('timeupdate', onTimeUpdate, true);
       observer = new MutationObserver(check);
-      observer.observe(root, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+      observer.observe(player ?? doc.body, OBSERVE_OPTIONS);
       check();
     },
 
@@ -124,6 +139,7 @@ export function createAdGuard({ doc, location, policy, storage, MutationObserver
         doc.removeEventListener('timeupdate', onTimeUpdate, true);
       }
       observer = null;
+      observingBody = false;
       lastContentTime = null;
       resumeTime = null;
       reloadTimer = cancel(reloadTimer);
