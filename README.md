@@ -26,6 +26,14 @@ npm test
 
 Needs Node 20+; no dependencies, no browser, no network.
 
+## Icons
+
+The source is `assets/icon.svg`. After changing it, regenerate the PNGs (needs ImageMagick 7):
+
+```sh
+for s in 16 32 48 128; do magick -background none -density 384 assets/icon.svg -resize ${s}x${s} -strip icons/icon-$s.png; done
+```
+
 ## Manual acceptance checklist (real browser)
 
 Automated tests use fakes, so these need a real Chrome:

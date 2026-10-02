@@ -49,3 +49,8 @@ test('CHANGELOG top entry matches the package version', () => {
   const log = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
   assert.equal(log.match(/^## (\S+)/m)[1], pkg.version);
 });
+
+test('every icon file listed in the manifest exists', () => {
+  const paths = [...Object.values(manifest.icons), ...Object.values(manifest.action.default_icon)];
+  for (const path of paths) assert.doesNotThrow(() => readFileSync(new URL(`../${path}`, import.meta.url)), path);
+});

@@ -49,6 +49,11 @@ test('zip contains every src module and nothing else under src', () => {
   ]);
 });
 
+test('zip contains the icons and not their svg source', () => {
+  const names = files.map((f) => f.name).filter((n) => n.startsWith('icons/') || n.startsWith('assets/'));
+  assert.deepEqual(names, ['icons/icon-128.png', 'icons/icon-16.png', 'icons/icon-32.png', 'icons/icon-48.png']);
+});
+
 test('zip excludes tests, scripts, node_modules and package files', () => {
   const bad = files.map((f) => f.name).filter((n) => /^(test|scripts|node_modules|package|dist)/.test(n));
   assert.deepEqual(bad, []);

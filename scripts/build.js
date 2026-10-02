@@ -5,9 +5,9 @@ import { join } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
-// Only what the browser needs at runtime; tests, scripts and node_modules stay out.
+// Only what the browser needs at runtime; tests, scripts, node_modules and the icon source (assets/) stay out.
 const SHIPPED_FILES = ['manifest.json', 'popup.html'];
-const SHIPPED_DIRS = ['src'];
+const SHIPPED_DIRS = ['icons', 'src'];
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;

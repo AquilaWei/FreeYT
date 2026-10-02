@@ -4,17 +4,117 @@
   <meta charset="utf-8">
   <title>FreeYT</title>
   <style>
-    body { font: 14px sans-serif; width: 260px; margin: 12px; }
-    label { display: block; margin: 8px 0; }
-    input[type="number"] { width: 80px; float: right; }
-    #status { color: #555; min-height: 1.2em; }
+    :root {
+      --bg: #ffffff;
+      --surface: #f4f4f6;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --border: #e2e2e7;
+      --accent: #e0243a;
+      --track: #c7c7cc;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1e;
+        --surface: #2c2c2e;
+        --text: #f5f5f7;
+        --muted: #a1a1a6;
+        --border: #3a3a3c;
+        --track: #48484a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 280px;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    header img { width: 32px; height: 32px; }
+    header h1 { flex: 1; margin: 0; font-size: 16px; font-weight: 600; }
+
+    /* The checkbox stays a real input (keyboard, screen readers); only its look changes. */
+    .switch {
+      appearance: none;
+      position: relative;
+      width: 40px;
+      height: 24px;
+      margin: 0;
+      border-radius: 12px;
+      background: var(--track);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+      transition: transform 0.15s;
+    }
+    .switch:checked { background: var(--accent); }
+    .switch:checked::after { transform: translateX(16px); }
+    .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .count {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      background: var(--surface);
+    }
+    .count span { color: var(--muted); }
+    .count strong { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .settings { border: 1px solid var(--border); border-radius: 10px; }
+    .settings label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+    }
+    .settings label + label { border-top: 1px solid var(--border); }
+    .settings input {
+      width: 84px;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      text-align: right;
+    }
+    .settings input:focus { outline: none; border-color: var(--accent); }
+    /* Settings are irrelevant while the extension is off. */
+    body:has(#enabled:not(:checked)) .settings { opacity: 0.5; }
+
+    #status { min-height: 1.4em; margin: 10px 0 0; color: var(--muted); font-size: 12px; }
   </style>
 </head>
 <body>
-  <label><input type="checkbox" id="enabled"> Enabled</label>
-  <label>Max reloads <input type="number" id="maxAttempts" min="1" max="100"></label>
-  <label>Delay (ms) <input type="number" id="delayMs" min="500" max="30000" step="100"></label>
-  <p>Reloads on this video: <strong id="attempts">–</strong></p>
+  <header>
+    <img src="icons/icon-32.png" alt="">
+    <h1>FreeYT</h1>
+    <input type="checkbox" class="switch" id="enabled" aria-label="Enabled">
+  </header>
+  <div class="count">
+    <span>Reloads on this video</span>
+    <strong id="attempts">–</strong>
+  </div>
+  <div class="settings">
+    <label>Max reloads <input type="number" id="maxAttempts" min="1" max="100"></label>
+    <label>Delay (ms) <input type="number" id="delayMs" min="500" max="30000" step="100"></label>
+  </div>
   <p id="status"></p>
   <script type="module" src="src/popup-main.js"></script>
 </body>
