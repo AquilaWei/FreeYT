@@ -27,8 +27,15 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - Manual real-browser check, observer scope: without `#movie_player` the guard observes class changes on the whole `body`, which can be expensive; it switches to the player only after the next navigation restarts it.
 - F6: no separate options page; the popup holds all settings. Changes apply from the next page load (not live). The popup gets the reload count via `tabs.sendMessage` to the content script (avoids the `scripting` permission). Real-browser check: popup shows the count on a watch page and `–` elsewhere; disabling stops reloads after a refresh.
 
+## After 0.1.0 (2026-10-02)
+- User confirmed basic functions work in Chrome. Resume-after-reload was not called out separately; re-check it with the next real-browser pass.
+- User answers: at the cap, stop reloading and let the ad play; cap raised (default 20, popup max 100). Trigger on every ad that interrupts playback (pre-roll and mid-roll); current selectors already cover that, overlay banners are excluded on purpose.
+- Observer: while `#movie_player` is missing the guard observes `body`, then moves to the player on the first mutation that finds it (no longer waits for the next navigation).
+- Icon: source `assets/icon.svg` (not shipped), PNGs in `icons/` (shipped). Popup redesigned (header switch, count card, settings card, dark mode); element ids unchanged so `src/popup.js` and its tests are untouched.
+- Needs a real-browser check: icon in the toolbar and on `chrome://extensions`, popup look in light and dark mode, cap 20 reached on a stubborn ad.
+
 ## Pending after 0.1.0
-- Non-blocking risks: the observer scope without `#movie_player`, the resume seek landing on an ad's video, and settings applying only from the next page load (see notes above).
-- The 5 open questions in `feature_list.json` are still unanswered; defaults stay the first option of each.
+- Non-blocking risks: the resume seek landing on an ad's video, and settings applying only from the next page load (see notes above).
+- Open questions in `feature_list.json` still unanswered: tooling, popup scope, target browsers; defaults stay the first option.
 - `v0.1.0` stays on the version-bump commit (no LICENSE in that tag); it is not moved.
 - Chrome Web Store listing: not discussed, needs the user's decision.

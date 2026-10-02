@@ -86,11 +86,13 @@
     },
     {
       "question": "What should happen when the ad persists after the max reload attempts?",
-      "options": ["Stop reloading and leave the page (show a console/badge note)", "Keep reloading with growing delay (backoff), never stop", "Stop and try to click the Skip button instead"]
+      "options": ["Stop reloading and leave the page (show a console/badge note)", "Keep reloading with growing delay (backoff), never stop", "Stop and try to click the Skip button instead"],
+      "answer": "User 2026-10-02: stop reloading and let the ad play; raise the cap (default 20, popup max 100)."
     },
     {
       "question": "Which ads should trigger a reload?",
-      "options": ["Any video ad (pre-roll and mid-roll)", "Pre-roll only (before the video starts)", "Only ads that cannot be skipped"]
+      "options": ["Any video ad (pre-roll and mid-roll)", "Pre-roll only (before the video starts)", "Only ads that cannot be skipped"],
+      "answer": "User 2026-10-02: every ad that interrupts video playback (pre-roll and mid-roll); overlay banners that do not stop playback are excluded."
     },
     {
       "question": "Should there be a popup/options UI (F6)?",
