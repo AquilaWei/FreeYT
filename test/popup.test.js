@@ -30,7 +30,7 @@ test('popup shows default toggle state and values when storage is empty', async 
   const { doc, elements, settingsArea, tabs } = setup();
   await initPopup({ doc, settingsArea, tabs });
   assert.equal(elements.enabled.checked, true);
-  assert.equal(elements.maxAttempts.value, 10);
+  assert.equal(elements.maxAttempts.value, 20);
   assert.equal(elements.delayMs.value, 1000);
 });
 

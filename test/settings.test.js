@@ -12,7 +12,7 @@ function fakeArea(initial = {}) {
 }
 
 test('empty storage loads the defaults', async () => {
-  assert.deepEqual(await loadSettings(fakeArea()), { enabled: true, maxAttempts: 10, delayMs: 1000 });
+  assert.deepEqual(await loadSettings(fakeArea()), { enabled: true, maxAttempts: 20, delayMs: 1000 });
 });
 
 test('stored values are returned', async () => {
@@ -32,12 +32,12 @@ test('max attempts of zero or less is clamped up to 1', () => {
   assert.equal(normalizeSettings({ maxAttempts: 0 }).maxAttempts, 1);
 });
 
-test('max attempts above the limit is clamped down to 50', () => {
-  assert.equal(normalizeSettings({ maxAttempts: 1000 }).maxAttempts, 50);
+test('max attempts above the limit is clamped down to 100', () => {
+  assert.equal(normalizeSettings({ maxAttempts: 1000 }).maxAttempts, 100);
 });
 
 test('non-numeric numbers fall back to the defaults', () => {
-  assert.deepEqual(normalizeSettings({ maxAttempts: 'abc', delayMs: NaN }), { enabled: true, maxAttempts: 10, delayMs: 1000 });
+  assert.deepEqual(normalizeSettings({ maxAttempts: 'abc', delayMs: NaN }), { enabled: true, maxAttempts: 20, delayMs: 1000 });
 });
 
 test('non-boolean enabled does not disable the extension', () => {
@@ -49,7 +49,7 @@ test('numeric strings from form inputs are accepted', () => {
 });
 
 test('null raw settings give the defaults', () => {
-  assert.deepEqual(normalizeSettings(null), { enabled: true, maxAttempts: 10, delayMs: 1000 });
+  assert.deepEqual(normalizeSettings(null), { enabled: true, maxAttempts: 20, delayMs: 1000 });
 });
 
 test('saveSettings stores the clamped merge and keeps untouched fields', async () => {

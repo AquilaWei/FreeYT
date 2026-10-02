@@ -1,4 +1,4 @@
-export const DEFAULT_MAX_ATTEMPTS = 10;
+export const DEFAULT_MAX_ATTEMPTS = 20;
 export const DEFAULT_DELAY_MS = 1000;
 // Floor for the reload delay so a misconfiguration cannot cause a tight reload loop.
 export const MIN_DELAY_MS = 500;

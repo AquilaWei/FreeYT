@@ -17,11 +17,11 @@ test('first ad detection returns reload true and counts one attempt', () => {
   assert.equal(policy.attempts('abc'), 1);
 });
 
-test('returns reload false with reason limit after the default 10 attempts', () => {
+test('returns reload false with reason limit after the default 20 attempts', () => {
   const policy = createRetryPolicy(fakeStorage());
-  for (let i = 0; i < 10; i++) policy.onAdDetected('abc');
+  for (let i = 0; i < 20; i++) policy.onAdDetected('abc');
   assert.deepEqual(policy.onAdDetected('abc'), { reload: false, reason: 'limit' });
-  assert.equal(policy.attempts('abc'), 10);
+  assert.equal(policy.attempts('abc'), 20);
 });
 
 test('honors a custom max attempts', () => {
@@ -71,15 +71,15 @@ test('non-numeric string delay is never below 500 ms', () => {
   assert.equal(policy.onAdDetected('abc').delayMs, 1000);
 });
 
-test('NaN max attempts falls back to the default cap of 10', () => {
+test('NaN max attempts falls back to the default cap of 20', () => {
   const policy = createRetryPolicy(fakeStorage(), { maxAttempts: NaN });
-  for (let i = 0; i < 10; i++) policy.onAdDetected('abc');
+  for (let i = 0; i < 20; i++) policy.onAdDetected('abc');
   assert.deepEqual(policy.onAdDetected('abc'), { reload: false, reason: 'limit' });
 });
 
 test('non-numeric string max attempts still caps reloads', () => {
   const policy = createRetryPolicy(fakeStorage(), { maxAttempts: 'abc' });
-  for (let i = 0; i < 10; i++) policy.onAdDetected('abc');
+  for (let i = 0; i < 20; i++) policy.onAdDetected('abc');
   assert.equal(policy.onAdDetected('abc').reload, false);
 });
 

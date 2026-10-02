@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 // Upper bounds keep a typo from producing an effectively endless reload loop or a minutes-long wait.
-export const MAX_ATTEMPTS_LIMIT = 50;
+export const MAX_ATTEMPTS_LIMIT = 100;
 export const MAX_DELAY_MS = 30000;
 
 function clampInt(value, min, max, fallback) {
