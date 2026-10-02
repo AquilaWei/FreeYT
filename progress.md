@@ -32,7 +32,7 @@ F1 done (scaffold). F2 done (`src/ad-detector.js` `isAdPlaying(doc)`, tested wit
 - User answers: at the cap, stop reloading and let the ad play; cap raised (default 20, popup max 100). Trigger on every ad that interrupts playback (pre-roll and mid-roll); current selectors already cover that, overlay banners are excluded on purpose.
 - Observer: while `#movie_player` is missing the guard observes `body`, then moves to the player on the first mutation that finds it (no longer waits for the next navigation).
 - Icon: source `assets/icon.svg` (not shipped), PNGs in `icons/` (shipped). Popup redesigned (header switch, count card, settings card, dark mode); element ids unchanged so `src/popup.js` and its tests are untouched.
-- Needs a real-browser check: icon in the toolbar and on `chrome://extensions`, popup look in light and dark mode, cap 20 reached on a stubborn ad.
+- 2026-10-02: user verified these changes in Chrome; released as 0.2.0 (0.1.1 was the untagged test version).
 
 ## Pending after 0.1.0
 - Non-blocking risks: the resume seek landing on an ad's video, and settings applying only from the next page load (see notes above).
