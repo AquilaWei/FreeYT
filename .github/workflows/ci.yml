@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build and verify (e.g. v0.1.0)
+        required: true
+      overwrite:
+        description: Replace assets of an existing release when the SHA256 differs
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
+
+  release:
+    # Only tags and manual runs publish; branch pushes and PRs stop after the tests.
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build zip and SHA256
+        run: |
+          npm run build
+          cd dist
+          sha256sum "freeyt-${TAG#v}.zip" > "freeyt-${TAG#v}.zip.sha256"
+      - name: Extract release notes from CHANGELOG
+        run: |
+          # Body of the "## <version>" section, unchanged.
+          awk -v v="${TAG#v}" '/^## /{p=($2==v);next} p' CHANGELOG.md | sed '/./,$!d' > notes.md
+          test -s notes.md
+      - name: Publish, or verify an existing release
+        run: |
+          zip="dist/freeyt-${TAG#v}.zip"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" "$zip" "$zip.sha256" --title "$TAG" --notes-file notes.md
+            exit 0
+          fi
+          # Release already exists: refuse to replace it unless the CI build is byte-identical or overwrite=true.
+          mkdir published
+          gh release download "$TAG" --dir published --pattern '*.zip'
+          if [ "$(sha256sum < "$zip")" = "$(sha256sum < "published/freeyt-${TAG#v}.zip")" ]; then
+            echo "Published zip matches the CI build."
+          elif [ "${{ inputs.overwrite }}" = "true" ]; then
+            gh release upload "$TAG" "$zip" "$zip.sha256" --clobber
+          else
+            echo "::error::CI build differs from the published zip; rerun with overwrite=true to replace it."
+            exit 1
+          fi
